@@ -1,0 +1,269 @@
+https://kafka.apache.org/documentation/#gettingStarted
+
+##########PATH FOR binary files for kafka : D:\Dev-kafka\kafka_2.12-2.3.0
+
+1.Kafka native/Binaries installation-Binary downloads:  || https://kafka.apache.org/downloads
+2.docker
+3. unzip the file and extract it then
+>>>>cd kafka\bin\windows
+
+4.kafka-topics.bat  ------run this
+
+############################################SET the path
+5.D:\Dev-kafka\kafka_2.12-2.3.0\bin\windows
+
+6. RUN RUN ZooKeeper
+#create new directory called under the path ---D:\Dev-kafka\kafka_2.12-2.3.0     ##data--zookeeper and kafka
+
+###########################################EDIT -ZooKeeper.properties and forward slash  @@@@@@@@@@@ZooKeeper RUN 2181
+
+-->now copy path upto--zookeeper ##D:\Dev-kafka\kafka_2.12-2.3.0\data\zookeeper
+-->now open kafka_2.12-2.3.0/config/ZooKeeper.properties  ##D:\Dev-kafka\kafka_2.12-2.3.0\config  
+Edit with path #dataDir=/tmp/zookeeper to
+##dataDir=D:/Dev-kafka/kafka_2.12-2.3.0/data/zookeeper
+
+-->Go to \kafka_2.12-2.3.0\bin\windows>zookeeper-server-start.bat and  cmd run --zookeeper-server-start.bat
+
+TESTING FOR ZooKeeper  ||---> Go for kafka home directory kafka_2.12-2.3.0
+zookeeper-server-start.bat config/zookeeper.properties
+
+on success : [2021-12-07 18:02:12,848] INFO binding to port 0.0.0.0/0.0.0.0:2181 (org.apache.zookeeper.server.NIOServerCnxnFactory)
+
+@@might be port issue and need to close
+
+###########################################EDIT -server.properties  and forward slash   @@@@@@@@@@@kafka server RUN
+
+-->kafka_2.12-2.3.0/config/server.properties
+edit # 
+log.dirs=/tmp/kafka-logs to
+copy the path upto under data
+log.dirs=D:/Dev-kafka/kafka_2.12-2.3.0/data/kafka
+
+--->Go to kafka home directory ##D:/Dev-kafka/kafka_2.12-2.3.0 -->cmd  and run kafka-server-start.bat
+
+TESTING
+kafka-server-start.bat config/server.properties
+
+on success: kafka-server-start.bat config/server.properties
+failure need to check port 9092
+failure zookeeper is offile not connect 2181 need to make sure zookeeper running kafka server RUN 9091
+
+
+
+NOTE
+start zookeeper start kafka server and zookeeper should connect with kafka server
+
+##zookeeper-server-start.bat config/zookeeper.properties
+##kafka-server-start.bat config/server.properties
+#kafka-topics.bat
+#kafka-console-consumer.bat
+
+#######################################################################################################################
+producer --->warehouse---->consumer
+ publisher           subscriber
+ 
+ 
+ Storage Room is --->TOPIC
+ counter is ---> PARTITION
+ P0: offset(messageID)---->key :gold ::msg
+ P1: offset           ---->key: iron ::msg
+ P3: offset           ---->key: wood ::msg
+ 
+#Topic can has one or more partition -->used for kafka concurrent processing
+#
+
+Producer --->kafka Topic--->
+Which topic and message content
+kafka automatically select partition or can override
+
+Consumer gurantee read data in order for each partition 
+kafka config handle consumer read message from partition
+
+
+################################### go to Kafka home  @@@@@@@@@@@@@@2**********************RRRRUUUUUUUUUUUNNNNNNNN
+zookeeper-server-start.bat config/zookeeper.properties
+kafka-server-start.bat config/server.properties
+
+kafka-topics.bat  inside this run below
+
+kafka-topics.bat --bootstrap-server=localhost:9092
+error:Command must include exactly one action: --list, --describe, --create, --alter or --delete
+
+kafka-topics.bat --bootstrap-server=localhost:9092 --create --topic t_hello --partitions 1
+NOTE: replication-factor for each partitions in topic
+
+
+kafka-topics.bat --bootstrap-server=localhost:9092 --create --topic t_hello --partitions 1 --replication-factor 2
+as we using single node/server kafka cluster so replication factor is 1
+
+kafka-topics.bat --bootstrap-server=localhost:9092 --create --topic t_hello --partitions 1 --replication-factor 1
+
+TO GET the knowledge of topic
+kafka-topics.bat --bootstrap-server=localhost:9092 --list
+
+kafka-topics.bat --bootstrap-server=localhost:9092 --describe --topic t_hello
+
+kafka-topics.bat --bootstrap-server=localhost:9092 --create --topic t_test --partitions 1 --replication-factor 1
+
+DELETE
+kafka-topics.bat --bootstrap-server=localhost:9092 --delete --topic t_hello
+
+#########################
+1. create producer
+2.create consumer with group id in yml file i.e. default
+
+now run consumer and producer
+
+##############
+spring:
+  kafka:
+    consumer:
+      enable-auto-commit: true
+assuming you're running Kafka on default address, which is localhost:9092
+
+In case you're running on different server, you will need to change Spring configurations on src/main/resources/application.yml
+
+See below, it is comma-delimited list of host:port pairs to use for establishing
+
+spring:
+  kafka:
+    bootstrap-servers: "my-first-host:9092, my-second-host:9092"	
+
+______________________________________________________________________________________________________________________________	
+	  
+kafka-topics.bat --bootstrap-server=localhost:9092 --create --topic t_fixedrate --partitions 1 --replication-factor 1	  
+
+producer design -- t_fixedrate
+consumer design -- t_fixedrate
+stop
+#######################Fixing consumer
+Arrive before consumer started --->on topic message consume || before and after all
+auto.offset.reset=earliest
+
+or auto.offset.reset=latest (default)
+#########################################################Process
+---->create new topic
+kafka-topics.bat --bootstrap-server=localhost:9092 --create --topic t_fixedrate --partitions 1 --replication-factor 1
+--->start producer
+--->consumer auto-offset-reset=earliest 
+--->start consumer application
+
+###########################Message With Key
+***Same keys goes to same partition
+kafka-topics.bat --bootstrap-server=localhost:9092 --create --topic t_multi_partitions --partitions 3 --replication-factor 1
+
+# ***describe topic
+kafka-topics.bat --bootstrap-server localhost:9092 --describe --topic t_multi_partitions
+
+# add partition topic////modify topic
+kafka-topics.bat --bootstrap-server localhost:9092 --alter --topic t_multi_partitions --partitions 4
+
+
+----->**change in producer
+Add kafkakeyproducer.java and main class logic
+
+----> go to home
+kafka-console-consumer.bat 
+on this run :: 
+kafka-console-consumer.bat --bootstrap-server=localhost:9092 --topic t_multi_partitions --offset earliest --partition 0
+
+kafka-console-consumer.bat 
+on this run :: 
+kafka-console-consumer.bat --bootstrap-server=localhost:9092 --topic t_multi_partitions --offset earliest --partition 1
+
+kafka-console-consumer.bat 
+on this run :: 
+kafka-console-consumer.bat --bootstrap-server=localhost:9092 --topic t_multi_partitions --offset earliest --partition 2
+
+
+###################Mutiple consumer for each topic
+concurrency = "4" means mutiple thread for listner created for partitions 
+[t_multi_partitions-partition0 , t_multi_partitions-partition1]
+[t_multi_partitions-partition2]
+each consumer handle 2 and one partiton
+
+modify topic//add partition
+kafka-topics.bat --bootstrap-server localhost:9092 --alter --topic t_multi_partitions --partitions 4
+
+##################delete topic --ok but partition-->loss data ||| wrong key distribution 
+decrease partition-->delete topic--->recreate it
+
+
+
+#####Java usually use Jackson or Gson for JSON library.
+ Jackson. link for Jackson libraries you need to put on build.gradle are:
+ implementation 'com.fasterxml.jackson.core:jackson-core:2.9.9'
+implementation 'com.fasterxml.jackson.core:jackson-databind:2.9.9'
+implementation 'com.fasterxml.jackson.core:jackson-annotations:2.9.9'
+
+####################################################Produce Json
+
+# add topic
+kafka-topics.bat --bootstrap-server localhost:9092 --create --topic t_employee --partitions 1 --replication-factor 1
+
+# Kafka console consumer
+kafka-console-consumer.bat --bootstrap-server localhost:9092 --topic t_employee --offset earliest --partition 0
+
+##########START
+add buid gradel--producer
+
+ implementation 'com.fasterxml.jackson.core:jackson-core:2.9.9'
+implementation 'com.fasterxml.jackson.core:jackson-databind:2.9.9'
+implementation 'com.fasterxml.jackson.core:jackson-annotations:2.9.9'
+
+--->change in producer add pojo employee.java || employeejsonproducer || main file change
+
+# add topic
+kafka-topics.bat --bootstrap-server localhost:9092 --create --topic t_employee --partitions 1 --replication-factor 1
+
+https://mkyong.com/gradle/java-lang-noclassdeffounderror-comfasterxmljacksonannotationjsonmerge/
+https://stackoverflow.com/questions/33638765/how-to-read-json-data-from-txt-file-in-java
+how to read json from text file in java
+--->run producer 
+--->run consumer to check value 
+# Kafka console consumer
+kafka-console-consumer.bat --bootstrap-server localhost:9092 --topic t_employee --offset earliest --partition 0
+
+
+
+##################consuming with consumer group so need to define consumer group id--groupId
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+####Kafka Arhitecture
